@@ -1,0 +1,48 @@
+name: Deploy Chronova
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate Android icons
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import zlib,struct,math
+          for n in (192,512):
+              data=bytearray()
+              for y in range(n):
+                  data.append(0)
+                  for x in range(n):
+                      u=(x-n/2)/(n/2);v=(y-n/2)/(n/2)
+                      dist=math.hypot(u,v)
+                      border=0.12<dist<0.67 and u<0.42 and not (-0.2<u<0.4 and abs(v)<0.4 and u>0.25)
+                      star=(abs(u-0.5)+abs(v+0.45)<0.20)
+                      if star: rgb=(238,186,255)
+                      elif border:rgb=(int(139+70*(v+1)/2),int(130+80*(1-u)/2),255)
+                      else:rgb=(int(14+35*(1-dist)),int(15+25*(1-dist)),int(43+60*(1-dist)))
+                      data.extend(max(0,min(255,k)) for k in rgb)
+              def chunk(t,d):return struct.pack('>I',len(d))+t+d+struct.pack('>I',zlib.crc32(t+d)&0xffffffff)
+              png=b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',n,n,8,2,0,0,0))+chunk(b'IDAT',zlib.compress(bytes(data),8))+chunk(b'IEND',b'')
+              open(f'icon-{n}.png','wb').write(png)
+          PY
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4
