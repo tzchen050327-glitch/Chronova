@@ -1,0 +1,26 @@
+{
+  "id": "./",
+  "name": "Chronova 星際日曆",
+  "short_name": "Chronova",
+  "description": "炫彩離線個人行程日曆",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#090b1c",
+  "theme_color": "#090b1c",
+  "lang": "zh-TW",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
